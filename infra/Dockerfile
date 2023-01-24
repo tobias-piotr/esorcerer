@@ -1,4 +1,4 @@
-FROM python:3.10.2-slim-buster as base
+FROM python:3.11.1-slim-buster as base
 
 # Expose port
 EXPOSE 80
