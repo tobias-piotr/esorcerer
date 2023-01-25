@@ -1,13 +1,16 @@
 [tool.ruff]
-line-length = 90
+line-length = 88
 select = ["E", "F", "I", "D", "UP", "N", "S", "C", "B"]
 ignore = ["D100", "D106", "D107", "D203", "D213", "B008"]
 
 [tool.ruff.per-file-ignores]
-"test_*.py" = ["S101", "S105"]
+"test_*.py" = ["S101", "S105", "D101", "D102"]
+
+[tool.black]
+line-length = 88
 
 [tool.pytest.ini_options]
 pythonpath = "esorcerer"
 testpaths = "tests"
-asyncio_mode = "strict"
+asyncio_mode = "auto"
 addopts = "-s --strict-markers -vv --cache-clear --maxfail=1 --cov=esorcerer --cov-report=term --cov-report=html --cov-branch --no-cov-on-fail --cov-fail-under=80 -W ignore::DeprecationWarning"
