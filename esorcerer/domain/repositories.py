@@ -15,6 +15,11 @@ class EventRepository(Protocol):
         """Get event by id."""
         ...
 
-    async def collect(self) -> list[models.EventModel]:
+    async def collect(
+        self,
+        filters: dict | None = None,
+        ordering: list[str] | None = None,
+        pagination: dict | None = None,
+    ) -> list[models.EventModel]:
         """Get events based on parameters."""
         ...

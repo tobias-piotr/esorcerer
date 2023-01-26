@@ -23,3 +23,13 @@ class EventCreateModel(BaseModel):
     type: str
     entity_id: uuid.UUID | None = None
     payload: dict = Field(default_factory=dict)
+
+
+class ProjectionModel(BaseModel):
+    """Projection model."""
+
+    created_at: datetime.datetime
+    last_update_at: datetime.datetime
+    entries: int
+    entity_id: uuid.UUID
+    body: dict

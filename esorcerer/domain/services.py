@@ -22,9 +22,35 @@ class EventService:
 
     async def get(self, uid: uuid.UUID) -> models.EventModel:
         """Get event by id."""
+        # TODO: 404
         return await self.repository.get(uid)
 
-    async def collect(self) -> list[models.EventModel]:
+    async def collect(
+        self,
+        filters: dict | None = None,
+        ordering: list[str] | None = None,
+        pagination: dict | None = None,
+    ) -> list[models.EventModel]:
         """Get events based on parameters."""
-        # TODO: Add filters
-        return await self.repository.collect()
+        return await self.repository.collect(filters, ordering, pagination)
+
+    # TODO: Cache
+    async def project(self, entity_id: uuid.UUID) -> models.ProjectionModel:
+        """Create projection for given entity."""
+        logger.info("Starting projection", entity_id=entity_id)
+        events = await self.collect({"entity_id": entity_id}, ["created_at"])
+
+        # TODO: If not events
+        body = {}
+        for event in events:
+            body.update(event.payload)
+
+        projection = models.ProjectionModel(
+            created_at=events[0].created_at,
+            last_update_at=events[-1].created_at,
+            entries=len(events),
+            entity_id=entity_id,
+            body=body,
+        )
+        logger.info("Projection created", projection=projection)
+        return projection

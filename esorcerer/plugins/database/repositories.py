@@ -17,7 +17,24 @@ class EventDBRepository:
         event = await db_models.EventModel.get(id=uid)
         return models.EventModel.from_orm(event)
 
-    async def collect(self) -> list[models.EventModel]:
+    async def collect(
+        self,
+        filters: dict | None = None,
+        ordering: list[str] | None = None,
+        pagination: dict | None = None,
+    ) -> list[models.EventModel]:
         """Get events by parameters."""
-        events = await db_models.EventModel.all()
-        return [models.EventModel.from_orm(event) for event in events]
+        if filters is None:
+            events = db_models.EventModel.all()
+        else:
+            events = db_models.EventModel.filter(**filters)
+
+        if ordering is not None:
+            events = events.order_by(*ordering)
+
+        if pagination is not None:
+            events = events.limit(pagination["per_page"]).offset(
+                pagination["per_page"] * pagination["page"]
+            )
+
+        return [models.EventModel.from_orm(event) for event in await events]
