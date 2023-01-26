@@ -33,7 +33,7 @@ class TestEventService:
 
     async def test_create(self):
         """Test create method."""
-        service = services.EventService(InMemoryEventRepository())
+        service = services.EventService(repository=InMemoryEventRepository())
         data = models.EventCreateModel(type="random-event", payload={})
         event = await service.create(data)
         assert event.id is not None
@@ -41,7 +41,7 @@ class TestEventService:
 
     async def test_get(self):
         """Test get method."""
-        service = services.EventService(InMemoryEventRepository())
+        service = services.EventService(repository=InMemoryEventRepository())
         data = models.EventCreateModel(type="random-event", payload={})
         created_event = await service.create(data)
         event = await service.get(created_event.id)
@@ -49,7 +49,7 @@ class TestEventService:
 
     async def test_collect(self):
         """Test collect method."""
-        service = services.EventService(InMemoryEventRepository())
+        service = services.EventService(repository=InMemoryEventRepository())
         data = models.EventCreateModel(type="random-event", payload={})
         event_1 = await service.create(data)
         event_2 = await service.create(data)

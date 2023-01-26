@@ -14,6 +14,9 @@ class Settings(BaseSettings):
     CORS_ALLOW_ORIGINS: list[str] = []
     API_PREFIX: str = "/eso"
 
+    # Database
+    DATABASE_URL: str = ""
+
     class Config:
         env_file = ".env"
         case_sensitive = True

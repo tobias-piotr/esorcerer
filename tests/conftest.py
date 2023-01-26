@@ -1,7 +1,10 @@
+from typing import AsyncGenerator
+
 import pytest
 import pytest_asyncio
 from fastapi import FastAPI
 from httpx import AsyncClient
+from tortoise import Tortoise
 
 from esorcerer.app import app
 from esorcerer.settings import settings
@@ -14,7 +17,19 @@ def test_app() -> FastAPI:
 
 
 @pytest_asyncio.fixture()
-async def http_client(test_app: FastAPI):
+async def use_db() -> AsyncGenerator[None, None]:
+    """Prepare a database for test usage."""
+    await Tortoise.init(
+        db_url="sqlite://:memory",
+        modules={"models": ["esorcerer.plugins.database.models"]},
+    )
+    await Tortoise.generate_schemas()
+    yield
+    await Tortoise._drop_databases()
+
+
+@pytest_asyncio.fixture()
+async def http_client(test_app: FastAPI) -> AsyncGenerator[AsyncClient, None]:
     """Create a http client."""
     async with AsyncClient(
         app=test_app,
