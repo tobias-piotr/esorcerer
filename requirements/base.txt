@@ -1,7 +1,7 @@
-fastapi==0.88.0
+fastapi==0.89.1
 uvicorn[standard]==0.20.0
 structlog==22.3.0
-httpx==0.23.1
+httpx==0.23.3
 tortoise-orm[asyncpg]==0.19.2
 redis==4.4.2
 celery==5.2.7
