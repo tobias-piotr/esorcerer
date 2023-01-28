@@ -1,5 +1,5 @@
 from esorcerer.domain import services
-from esorcerer.plugins.caching.repositories import RedisRepository
+from esorcerer.plugins.cache.repositories import RedisRepository
 from esorcerer.plugins.database.repositories import EventDBRepository
 
 
