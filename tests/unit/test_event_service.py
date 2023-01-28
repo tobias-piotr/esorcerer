@@ -4,45 +4,9 @@ import uuid
 import pytest
 
 from esorcerer.domain import exceptions, models, services
+from tests.unit.utils import InMemoryCacheRepository, InMemoryEventRepository
 
 pytestmark = [pytest.mark.asyncio]
-
-
-# It's like poetry, it rhymes
-class InMemoryEventRepository:
-    def __init__(self) -> None:
-        self.events: list[models.EventModel] = []
-
-    async def create(self, data):
-        event = models.EventModel(
-            id=uuid.uuid4(),
-            created_at=datetime.datetime.now(),
-            **data,
-        )
-        self.events.append(event)
-        return event
-
-    async def get(self, uid):
-        return next(event for event in self.events if event.id == uid)
-
-    async def collect(
-        self,
-        filters=None,
-        ordering=None,
-        pagination=None,
-    ):
-        return self.events
-
-
-class InMemoryCacheRepository:
-    def __init__(self) -> None:
-        self.cache: dict[str, bytes] = {}
-
-    def set(self, key, data):
-        self.cache[key] = data
-
-    def get(self, key):
-        return self.cache.get(key)
 
 
 class TestEventService:

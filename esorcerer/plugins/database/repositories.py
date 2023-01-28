@@ -1,5 +1,7 @@
 import uuid
 
+from tortoise import functions
+
 from esorcerer.domain import models
 from esorcerer.plugins.database import models as db_models
 
@@ -38,3 +40,14 @@ class EventDBRepository:
             )
 
         return [models.EventModel.from_orm(event) for event in await events]
+
+    async def group_by(self, field: str, min_count: int | None = None) -> list[dict]:
+        """Group events by given field."""
+        query = (
+            db_models.EventModel.filter(**{f"{field}__isnull": False})
+            .group_by(field)
+            .annotate(count=functions.Count(field))
+        )
+        if min_count:
+            query = query.filter(count__gte=min_count)
+        return list(await query.order_by("-count").values(field, "count"))
