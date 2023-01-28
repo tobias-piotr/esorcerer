@@ -33,17 +33,15 @@ class TestPeriodicTasks:
         result = periodic.create_expensive_projections()
         assert result == 0
 
-        # Create series of events for 2 entities
-        event_payload = models.EventCreateModel(type="t1", entity_id=uuid.uuid4())
+        event_payload_1 = models.EventCreateModel(type="t1", entity_id=uuid.uuid4())
+        event_payload_2 = models.EventCreateModel(type="t2", entity_id=uuid.uuid4())
+        event_payload_3 = models.EventCreateModel(type="t3")
         for _ in range(5):
-            await service.create(event_payload)
-        event_payload = models.EventCreateModel(type="t2", entity_id=uuid.uuid4())
-        for _ in range(5):
-            await service.create(event_payload)
-        # Additionally, have some with no entity attached
-        event_payload = models.EventCreateModel(type="t3")
-        for _ in range(5):
-            await service.create(event_payload)
+            # Create series of events for 2 entities
+            await service.create(event_payload_1)
+            await service.create(event_payload_2)
+            # Additionally, have some with no entity attached
+            await service.create(event_payload_3)
 
         result = periodic.create_expensive_projections()
         assert result == 2
