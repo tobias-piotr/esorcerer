@@ -1,16 +1,20 @@
 version: "3.8"
 
+x-default-app:
+  &default-app
+  build:
+    dockerfile: ./infra/Dockerfile
+    target: dev
+  volumes:
+    - .:/code
+  stdin_open: true
+  tty: true
+
 services:
   fastapi:
-    build:
-      dockerfile: ./infra/Dockerfile
-      target: dev
-    volumes:
-      - .:/code
+    <<: *default-app
     ports:
       - 8000:8000
-    stdin_open: true
-    tty: true
 
   postgres:
     image: "postgres:15-alpine"
@@ -34,6 +38,31 @@ services:
     volumes:
       - $PWD/redis-data:/var/lib/redis
       - $PWD/redis.conf:/usr/local/etc/redis/redis.conf
+
+  celery-worker:
+    <<: *default-app
+    command: celery --app esorcerer.plugins.tasks.worker.celery_app worker --loglevel=info
+    depends_on:
+      - fastapi
+      - redis
+
+  celery-beat:
+    <<: *default-app
+    command: celery --app esorcerer.plugins.tasks.worker.celery_app beat --loglevel=info
+    depends_on:
+      - fastapi
+      - celery-worker
+      - redis
+
+  celery-flower:
+    <<: *default-app
+    command: celery --app esorcerer.plugins.tasks.worker.celery_app flower --port=5555
+    ports:
+      - 5555:5555
+    depends_on:
+      - fastapi
+      - celery-worker
+      - redis
 
 volumes:
   postgres_data: {}

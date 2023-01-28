@@ -24,6 +24,14 @@ class EventRepository(Protocol):
         """Get events based on parameters."""
         ...
 
+    async def group_by(
+        self,
+        field: str,
+        min_count: int | None = None,
+    ) -> list[dict]:
+        """Group events by given field."""
+        ...
+
 
 class CacheRepository(Protocol):
     """Cache repository."""

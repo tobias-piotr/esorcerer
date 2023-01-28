@@ -42,17 +42,21 @@ class EventService:
         """Get events based on parameters."""
         return await self.events.collect(filters, ordering, pagination)
 
-    async def project(self, entity_id: uuid.UUID) -> models.ProjectionModel:
+    async def project(
+        self,
+        entity_id: uuid.UUID,
+        use_cache: bool = True,
+    ) -> models.ProjectionModel:
         """Create projection for given entity."""
         logger.info("Starting projection", entity_id=entity_id)
 
         projection_cache = self.cache.get(str(entity_id))
-        if projection_cache:
+        if projection_cache and use_cache:
             projection = models.ProjectionModel(**json.loads(projection_cache))
             logger.info("Existing projection found", projection=projection)
             return projection
 
-        logger.info("No projections found, creating a new one", entity_id=entity_id)
+        logger.info("Building a new projection", entity_id=entity_id)
 
         events = await self.collect({"entity_id": entity_id}, ["created_at"])
         if not events:
