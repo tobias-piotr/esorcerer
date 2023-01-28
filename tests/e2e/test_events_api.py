@@ -119,7 +119,7 @@ class TestEventsAPI:
             self.base_url + f"/project/{entity_id}"
         )
         expected_projection = models.ProjectionModel(
-            created_at=first_event.json()["created_at"],
+            started_at=first_event.json()["created_at"],
             last_update_at=last_event.json()["created_at"],
             entries=3,
             entity_id=entity_id,

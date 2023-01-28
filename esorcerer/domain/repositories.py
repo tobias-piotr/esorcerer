@@ -23,3 +23,13 @@ class EventRepository(Protocol):
     ) -> list[models.EventModel]:
         """Get events based on parameters."""
         ...
+
+
+class CacheRepository(Protocol):
+    """Cache repository."""
+
+    def set(self, key: str, data: str) -> None:
+        """Cache data by the key."""
+
+    def get(self, key: str) -> bytes | None:
+        """Get cache by the key."""

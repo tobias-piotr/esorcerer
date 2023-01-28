@@ -28,7 +28,7 @@ class EventCreateModel(BaseModel):
 class ProjectionModel(BaseModel):
     """Projection model."""
 
-    created_at: datetime.datetime
+    started_at: datetime.datetime
     last_update_at: datetime.datetime
     entries: int
     entity_id: uuid.UUID

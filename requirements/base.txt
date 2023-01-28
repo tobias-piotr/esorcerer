@@ -3,3 +3,4 @@ uvicorn[standard]==0.20.0
 structlog==22.3.0
 httpx==0.23.1
 tortoise-orm[asyncpg]==0.19.2
+redis==4.4.2

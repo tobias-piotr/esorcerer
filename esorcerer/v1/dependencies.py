@@ -1,8 +1,11 @@
 from esorcerer.domain import services
-from esorcerer.plugins.database import repositories
+from esorcerer.plugins.caching.repositories import RedisRepository
+from esorcerer.plugins.database.repositories import EventDBRepository
 
 
 def get_event_service() -> services.EventService:
     """Initialize event service."""
-    repository = repositories.EventDBRepository()
-    return services.EventService(repository=repository)
+    return services.EventService(
+        events=EventDBRepository(),
+        cache=RedisRepository(),
+    )

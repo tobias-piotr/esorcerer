@@ -3,11 +3,12 @@ import uuid
 
 import pytest
 
-from esorcerer.domain import models, services
+from esorcerer.domain import exceptions, models, services
 
 pytestmark = [pytest.mark.asyncio]
 
 
+# It's like poetry, it rhymes
 class InMemoryEventRepository:
     def __init__(self) -> None:
         self.events: list[models.EventModel] = []
@@ -33,12 +34,30 @@ class InMemoryEventRepository:
         return self.events
 
 
+class InMemoryCacheRepository:
+    def __init__(self) -> None:
+        self.cache: dict[str, bytes] = {}
+
+    def set(self, key, data):
+        self.cache[key] = data
+
+    def get(self, key):
+        return self.cache.get(key)
+
+
 class TestEventService:
     """Test cases for the EventService."""
 
+    def get_service(self) -> services.EventService:
+        """Return initialized service."""
+        return services.EventService(
+            events=InMemoryEventRepository(),
+            cache=InMemoryCacheRepository(),
+        )
+
     async def test_create(self):
         """Test create method."""
-        service = services.EventService(repository=InMemoryEventRepository())
+        service = self.get_service()
         data = models.EventCreateModel(type="random-event", payload={})
         event = await service.create(data)
         assert event.id is not None
@@ -46,7 +65,7 @@ class TestEventService:
 
     async def test_get(self):
         """Test get method."""
-        service = services.EventService(repository=InMemoryEventRepository())
+        service = self.get_service()
         data = models.EventCreateModel(type="random-event", payload={})
         created_event = await service.create(data)
         event = await service.get(created_event.id)
@@ -54,7 +73,7 @@ class TestEventService:
 
     async def test_collect(self):
         """Test collect method."""
-        service = services.EventService(repository=InMemoryEventRepository())
+        service = self.get_service()
         data = models.EventCreateModel(type="random-event", payload={})
         event_1 = await service.create(data)
         event_2 = await service.create(data)
@@ -63,7 +82,7 @@ class TestEventService:
 
     async def test_project(self):
         """Test creating projection."""
-        service = services.EventService(repository=InMemoryEventRepository())
+        service = self.get_service()
         entity_id = uuid.uuid4()
 
         first_event = await service.create(
@@ -90,9 +109,31 @@ class TestEventService:
 
         projection = await service.project(entity_id)
         assert projection == models.ProjectionModel(
-            created_at=first_event.created_at,
+            started_at=first_event.created_at,
             last_update_at=last_event.created_at,
             entries=3,
             entity_id=entity_id,
             body={"name": "Jon Jones", "is_champ": False},
         )
+
+    async def test_project_no_events(self):
+        """Test creating projection when there are no events."""
+        service = self.get_service()
+        with pytest.raises(exceptions.NotFoundException):
+            await service.project(uuid.uuid4())
+
+    async def test_project_with_cache(self):
+        """Test returning projection directly from cache."""
+        service = self.get_service()
+        eid = uuid.uuid4()
+        cached_projection = models.ProjectionModel(
+            started_at=datetime.datetime.now(),
+            last_update_at=datetime.datetime.now(),
+            entries=100,
+            entity_id=eid,
+            body={"cached": True},
+        )
+        service.cache.set(str(eid), cached_projection.json())
+
+        projection = await service.project(eid)
+        assert projection == cached_projection
