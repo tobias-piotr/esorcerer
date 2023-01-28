@@ -42,7 +42,7 @@ repos:
       - id: mypy
         name: MyPy
         exclude: ^.*\b(migrations)\b.*$
-        additional_dependencies: ["types-requests"]
+        additional_dependencies: ["types-requests", "types-redis"]
 
   - repo: https://github.com/asottile/pyupgrade
     rev: v3.3.1
