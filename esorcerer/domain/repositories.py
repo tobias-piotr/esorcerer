@@ -41,3 +41,31 @@ class CacheRepository(Protocol):
 
     def get(self, key: str) -> bytes | None:
         """Get cache by the key."""
+
+
+class HookRepository(Protocol):
+    """Hook repository interface."""
+
+    async def create(self, data: dict) -> models.HookModel:
+        """Create a new hook."""
+        ...
+
+    async def get(self, uid: uuid.UUID) -> models.HookModel:
+        """Get hook by id."""
+        ...
+
+    async def collect(
+        self,
+        filters: dict | None = None,
+        ordering: list[str] | None = None,
+        pagination: dict | None = None,
+    ) -> list[models.HookModel]:
+        """Get hooks based on parameters."""
+        ...
+
+    async def update(self, uid: uuid.UUID, data: dict) -> models.HookModel:
+        """Update hook with given data."""
+        ...
+
+    async def delete(self, uid: uuid.UUID) -> None:
+        """Delete hook."""

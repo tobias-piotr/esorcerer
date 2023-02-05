@@ -1,7 +1,4 @@
-import pytest
 from fastapi import status
-
-pytestmark = [pytest.mark.asyncio]
 
 
 class TestInternalAPI:

@@ -29,6 +29,11 @@ class TestEventsAPI:
         response = await http_client.get(self.base_url + f"/{response.json()['id']}")
         assert response.status_code == status.HTTP_200_OK
 
+    async def test_get_not_found(self, http_client):
+        """Test get endpoint with 404 response."""
+        response = await http_client.get(self.base_url + f"/{uuid.uuid4()}")
+        assert response.status_code == status.HTTP_404_NOT_FOUND
+
     async def test_collect(self, http_client):
         """Test list endpoint."""
         for _ in range(3):

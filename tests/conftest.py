@@ -4,6 +4,7 @@ import pytest
 import pytest_asyncio
 from fastapi import FastAPI
 from httpx import AsyncClient
+from pytest_mock import MockerFixture
 from tortoise import Tortoise
 
 from esorcerer.app import app
@@ -36,3 +37,9 @@ async def http_client(test_app: FastAPI) -> AsyncGenerator[AsyncClient, None]:
         base_url=f"http://test{settings.API_PREFIX}",
     ) as client:
         yield client
+
+
+@pytest.fixture(autouse=True)
+def mock_celery_runner(mocker: MockerFixture) -> None:
+    """Mock the celery runner execution."""
+    mocker.patch("esorcerer.plugins.tasks.runner.CeleryTaskRunner.run")

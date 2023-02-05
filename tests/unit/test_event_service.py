@@ -4,9 +4,11 @@ import uuid
 import pytest
 
 from esorcerer.domain import exceptions, models, services
-from tests.unit.utils import InMemoryCacheRepository, InMemoryEventRepository
-
-pytestmark = [pytest.mark.asyncio]
+from tests.unit.utils import (
+    InMemoryCacheRepository,
+    InMemoryEventRepository,
+    MockedTaskRunner,
+)
 
 
 class TestEventService:
@@ -17,6 +19,7 @@ class TestEventService:
         return services.EventService(
             events=InMemoryEventRepository(),
             cache=InMemoryCacheRepository(),
+            tasks_runner=MockedTaskRunner,
         )
 
     async def test_create(self):
@@ -83,7 +86,7 @@ class TestEventService:
     async def test_project_no_events(self):
         """Test creating projection when there are no events."""
         service = self.get_service()
-        with pytest.raises(exceptions.NotFoundException):
+        with pytest.raises(exceptions.NotFoundError):
             await service.project(uuid.uuid4())
 
     async def test_project_with_cache(self):
