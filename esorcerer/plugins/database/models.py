@@ -22,9 +22,6 @@ class EventModel(BaseModel):
 class HookModel(BaseModel):
     """Hook database model."""
 
-    id = fields.UUIDField(pk=True)
-    created_at = fields.DatetimeField(auto_now_add=True)
-    # TODO: Move those to an abstract model
     name = fields.CharField(max_length=63)
     is_active = fields.BooleanField()
     condition = fields.TextField()
