@@ -7,18 +7,10 @@ from esorcerer.v1 import types
 
 
 @dataclass
-class EventFiltersModel:
-    """Event filters model."""
+class OrderingModel:
+    """Ordering model."""
 
-    type: str | None = Query(None)
-    entity_id: uuid.UUID | None = Query(None)
-
-
-@dataclass
-class EventOrderingModel:
-    """Event ordering model."""
-
-    order_by: types.EventOrderingField | None = Query(None)
+    order_by: types.OrderingField | None = Query(None)
 
 
 @dataclass
@@ -27,3 +19,18 @@ class PaginationModel:
 
     page: int = Query(0)
     per_page: int = Query(10)
+
+
+@dataclass
+class EventFiltersModel:
+    """Event filters model."""
+
+    type: str | None = Query(None)
+    entity_id: uuid.UUID | None = Query(None)
+
+
+@dataclass
+class HookFiltersModel:
+    """Hook filters model."""
+
+    is_active: bool | None = Query(None)

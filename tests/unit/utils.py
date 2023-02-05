@@ -1,26 +1,37 @@
 import datetime
 import uuid
 from collections import Counter
+from typing import Generic, TypeVar
 
-from esorcerer.domain import models
+from pydantic import BaseModel
 
+from esorcerer.domain import exceptions, models
+
+Model = TypeVar("Model", bound=BaseModel)
 
 # It's like poetry, it rhymes
-class InMemoryEventRepository:
+class InMemoryRepository(Generic[Model]):
+    model: type[Model]
+
     def __init__(self) -> None:
-        self.events: list[models.EventModel] = []
+        self.entries: list[Model] = []
 
     async def create(self, data):
-        event = models.EventModel(
+        entry = self.model(
             id=uuid.uuid4(),
             created_at=datetime.datetime.now(),
             **data,
         )
-        self.events.append(event)
-        return event
+        self.entries.append(entry)
+        return entry
 
     async def get(self, uid):
-        return next(event for event in self.events if event.id == uid)
+        try:
+            return next(
+                (entry for entry in self.entries if entry.id == uid),  # type: ignore
+            )
+        except StopIteration:
+            raise exceptions.NotFoundError from None
 
     async def collect(
         self,
@@ -28,10 +39,14 @@ class InMemoryEventRepository:
         ordering=None,
         pagination=None,
     ):
-        return self.events
+        return self.entries
+
+
+class InMemoryEventRepository(InMemoryRepository[models.EventModel]):
+    model = models.EventModel
 
     async def group_by(self, field, min_count=None):
-        values = [getattr(event, field) for event in self.events]
+        values = [getattr(event, field) for event in self.entries]
         return [
             {field: k, "count": v} for k, v in Counter(values).items() if k is not None
         ]
@@ -46,3 +61,25 @@ class InMemoryCacheRepository:
 
     def get(self, key):
         return self.cache.get(key)
+
+
+class MockedTaskRunner:
+    @classmethod
+    def run(cls, name, *args, **kwargs):
+        pass
+
+
+class InMemoryHookRepository(InMemoryRepository[models.HookModel]):
+    model = models.HookModel
+
+    async def update(self, uid, data):
+        hook = await self.get(uid)
+        i = self.entries.index(hook)
+        new_hook = self.model(**hook.dict(), **data)
+        self.entries[i] = new_hook
+        return new_hook
+
+    async def delete(self, uid):
+        hook = await self.get(uid)
+        i = self.entries.index(hook)
+        self.entries.pop(i)

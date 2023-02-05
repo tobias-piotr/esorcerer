@@ -1,19 +1,14 @@
 import uuid
 from dataclasses import asdict
-from typing import Any
 
 from fastapi import APIRouter, Body, Depends, status
 
 from esorcerer.domain import models, services
 from esorcerer.v1.dependencies import get_event_service
-from esorcerer.v1.models import EventFiltersModel, EventOrderingModel, PaginationModel
+from esorcerer.v1.models import EventFiltersModel, OrderingModel, PaginationModel
+from esorcerer.v1.utils import dict_factory
 
-router = APIRouter(tags=["v1"], prefix="/api/v1/events")
-
-
-def dict_factory(d: list[tuple[str, Any]]) -> dict:
-    """Create a dict by removing empty values."""
-    return {k: v for k, v in d if v is not None}
+router = APIRouter(tags=["events"], prefix="/events")
 
 
 @router.post(
@@ -49,7 +44,7 @@ async def get_event(
 )
 async def get_events(
     filters: EventFiltersModel = Depends(),
-    ordering: EventOrderingModel = Depends(),
+    ordering: OrderingModel = Depends(),
     pagination: PaginationModel = Depends(),
     service: services.EventService = Depends(get_event_service),
 ) -> list[models.EventModel]:
